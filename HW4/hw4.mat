@@ -1,6 +1,7 @@
 % COSI101A code example (by Pengyu Hong)
 % Clustering analysis
 
+
 %% load data
 data = csvread( 'clustering.csv' );
 num_points = size( data, 1 );
@@ -10,39 +11,6 @@ colors = {'.r', '.g', '.b', '.m', '.y', '.k' };
 cmap = colormap( 'lines' );
 numColor = size(cmap,1);
 
-%% hierarchical clustering
-num_clusters = 6;
-disFunctions = {'correlation', 'euclidean', 'cityblock'};
-linkageMethods = { 'single', 'complete', 'average', 'centroid' };
-disID = 3; % choose distance function
-linkageID = 3; % choose linkage analysis method 
-y = pdist( data, disFunctions{disID} ); % euclid, correlation
-z = linkage( y, linkageMethods{linkageID} ); % single, complete, average, centroid
-t = cluster( z, 'maxclust', num_clusters );
-clusters = unique( t );
-
-subsets = [];
-for m = 1 : length( clusters )
-    subsets{m}.data = [];
-end
-
-for m = 1 : length( clusters )
-    subsets{m}.data = data(t == m, :);
-end
-
-figure;
-for k = 1 : length( subsets )
-    ind = mod( k, numColor );
-    if ind == 0, ind = numColor; end
-    plot( subsets{k}.data(:,1), subsets{k}.data(:,2), '.', 'Color', cmap(ind, :) ); 
-    if k == 1
-        hold;
-    end
-end
-title( ['Distance: ', disFunctions{disID}, '; Linkage: ', linkageMethods{linkageID}] );
-figure;
-dendrogram(z, 0);
-title( ['Distance: ', disFunctions{disID}, '; Linkage: ', linkageMethods{linkageID}] );
 
 %% k-means
 num_classes = 6;
