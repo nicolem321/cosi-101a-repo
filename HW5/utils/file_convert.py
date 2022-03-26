@@ -21,7 +21,6 @@ class FileConverter:
                 if item == '\n':
                     row.remove(item)
                 
-        
     def load_csv(self, output_file_name: str) -> None:
         '''method to use a 2d matrix of rows of data to build a csv file.'''
         # output_file_name = 'hw5_data/training.csv'
@@ -29,6 +28,7 @@ class FileConverter:
             write = csv.writer(out)
             write.writerows(self.rows)
         print('\n\n\n', f'='*50, f'\n\nCSV CREATED AT: \n( {output_file_name} )\n\njob finished successfully :)\n', f'='*50, '\n\n\n')
+            
             
 if __name__ == '__main__':
     # input_file_name = input('Enter .txt File Path > ')

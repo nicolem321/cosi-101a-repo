@@ -1,4 +1,14 @@
-load KNN_Data;
+%%%%%%
+% This code is given and is not used in this assingment.
+% It is, however, a useful matlab resource and I am therefore
+% keeping it stored locally.
+%
+% Written By: Pengyu Hong
+%%%%%%
+
+
+
+oad KNN_Data;
 plot( data1(:,1), data1(:,2), 'r.', data2(:,1), data2(:,2), 'b.', test(:,1), test(:,2), 'k^', 'MarkerSize', 10 );
 
 %%
