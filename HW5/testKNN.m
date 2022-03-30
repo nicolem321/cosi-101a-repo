@@ -8,7 +8,7 @@
 
 
 
-oad KNN_Data;
+load KNN_Data;
 plot( data1(:,1), data1(:,2), 'r.', data2(:,1), data2(:,2), 'b.', test(:,1), test(:,2), 'k^', 'MarkerSize', 10 );
 
 %%
