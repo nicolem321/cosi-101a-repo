@@ -46,7 +46,7 @@ This section works to train the model and to see if it is capable of producing r
 
 * Model Evaluation
 
-In this section, the running of the model in the previous section is evaluated using certain metrics including the accuracy score, the recall score, and the f1 score. Using scikitlearn's `confusion_matrix` and `classification_report` methods, I am able to generate a helpful and informative report of the models performance.
+In this section, I pick which distance metric is best for our dataset by evaluating each run on the default settings save their distance metric. Each trial is evaluated using certain metrics including the accuracy score, the recall score, and the f1 score. Using scikitlearn's `confusion_matrix` and `classification_report` methods, I am able to generate a helpful and informative report of the models performance. The three metrics I tried were: `manhattan` (city block), `minkowski` (cosine), and `euclidean`. Based on the metrics produced, the city-block distance metric worked best, achieving a 94% across the board, on average 1-2% higher than the other metrics.
 
 * Picking The Right K
 
