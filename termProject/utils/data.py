@@ -49,7 +49,11 @@ class DataPy():
         try:
             self.curr_frame = pd.read_csv(self.in_file_path, delimiter = '\t')     # txt tab spaced doc expected
             old_path = os.getcwd()
-            os.chdir('../data/train/imgs')
+            path_lst = old_path.split('/')
+            if path_lst[len(path_lst)-1] == 'termProject':
+                os.chdir('data/train/imgs')
+            elif path_lst[len(path_lst)-1] == 'utils':
+                os.chdir('../data/train/imgs')
             for index, row in self.curr_frame.iterrows():
                 path_name = os.getcwd() + '/' + row['image_name']
                 self.curr_frame.loc[index, 'image_name'] = path_name
@@ -65,7 +69,11 @@ class DataPy():
         try:
             self.curr_frame = pd.read_csv(self.in_file_path, delimiter = '\t').groupby('class')['image_name'].apply(list).to_frame()     # txt tab spaced doc expected
             old_path = os.getcwd()
-            os.chdir('../data/train/imgs')
+            path_lst = old_path.split('/')
+            if path_lst[len(path_lst)-1] == 'termProject':
+                os.chdir('data/train/imgs')
+            elif path_lst[len(path_lst)-1] == 'utils':
+                os.chdir('../data/train/imgs')
             for index, row in self.curr_frame.iterrows():
                 for i in range(len(row['image_name'])):
                     path_name = os.getcwd() + '/' + row['image_name'][i]
@@ -92,7 +100,6 @@ if __name__ == '__main__':
     data_df = dpy.get_df()
     class_df = dpy.get_cls()
     
-    # dpy.to_csv('/Users/masonware/Desktop/COSI_101A/termProject/data/train/test.csv')
-    
+    dpy.to_csv('/Users/masonware/Desktop/COSI_101A/termProject/data/train/test.csv')
     
     
