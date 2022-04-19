@@ -1,16 +1,28 @@
+#!usr/bin/python3
+
+# main.py
+# Version 1.0.0
+# 4-19-22
+
+# Written By: Mason Ware 
+
+
+''' This file is a single representation of part of the code that appears in the 
+    file ./hw6.ipynb '''
+
+
 import os
 from typing import Tuple
 
 from utils import timer
 
 import idx2numpy                                            # type: ignore
-import numpy as np
+import numpy as np                                          # type: ignore
 from mlxtend.data import loadlocal_mnist                    # type: ignore
-from numpy import mean
-from numpy import std
-from matplotlib import pyplot as plt
-from sklearn.model_selection import KFold
-# from tensorflow.keras.datasets import mnist                 # type: ignore
+from numpy import mean                                      # type: ignore
+from numpy import std                                       # type: ignore
+from matplotlib import pyplot as plt                        # type: ignore
+from sklearn.model_selection import KFold                   # type: ignore
 from tensorflow.keras.utils import to_categorical           # type: ignore
 from tensorflow.keras.models import Sequential              # type: ignore
 from tensorflow.keras.layers import Conv2D                  # type: ignore
