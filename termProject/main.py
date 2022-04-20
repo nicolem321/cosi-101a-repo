@@ -35,11 +35,20 @@ import matplotlib.image as mpimg                            # type: ignore
 
 from utils.data import DataPy as dpy
 
+
+
+# TODO
+# 1. use imgs_classified_split to:
+#       train -> X_train
+#       val -> X_test
+#       all subfolder's names in train -> y_train
+#       all subfolder's names in test -> y_test
+
+
 dir_str = os.getcwd() + '\data\\train\labels.txt'
 dpy.read_data(dpy, dir_str)
 data_df = dpy.get_df(dpy)
 train = list()
-
 
 for index, row in data_df.iterrows():
     train.append(mpimg.imread(row['image_name']))
@@ -50,11 +59,37 @@ for i in range(9):
     plt.imshow(train[i], cmap=plt.get_cmap('gray'))
 plt.show()
 
-arr = np.array(train)
-print(arr)
+X_train = np.array(train)
 
-#TODO
-#can I now just start working with train?
+# TODO
+# build X_train and X_test
+# ...
+
+
+
+@timer
+# load train and test dataset
+def load_dataset() -> Tuple:
+    # reshape dataset to have a single channel
+    trainX = X_train.reshape((X_train.shape[0], 28, 28, 1))
+    # testX = X_train.reshape((X_train.shape[0], 28, 28, 1))
+    
+    # one hot encode target values
+    trainY = to_categorical(y_train)
+    # testY = to_categorical(y_test)
+    return (trainX, trainY, testX, testY)
+
+@timer
+# scale pixels
+def prep_pixels(train, test):
+	# convert from integers to floats
+    train_norm = train.astype('float32')
+    test_norm = test.astype('float32')
+    # normalize to range 0-1
+    train_norm = train_norm / 255.0
+    test_norm = test_norm / 255.0
+    # return normalized images
+    return train_norm, test_norm
 
 #############################################################################
 #############################################################################

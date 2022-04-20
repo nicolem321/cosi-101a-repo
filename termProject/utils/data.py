@@ -11,7 +11,7 @@
 
     from utils.data import DataPy as dpy
 
-    dpy.read_data('path_name.txt')
+    dpy.read_data(dpy, 'path_name.txt')
 
     data_frame = dpy.get_df()        # this gets a generic two dimensional dataframe of each image and its class
     class_frame = dpy.get_class()    # this gets a two dimensional dataframe of each class and its set of images
@@ -28,7 +28,6 @@
 
 import os
 
-
 import pandas as pd
 import colorama                         # type: ignore
 from colorama import Fore               # type: ignore
@@ -42,7 +41,6 @@ class DataPy():
     
     def read_data(self, in_file_path) -> None:
         self.in_file_path=in_file_path
-
         
     def get_df(self) -> "pd.DataFrame":
         ''' method to generate a pandas dataframe from given txt file. '''
@@ -59,10 +57,10 @@ class DataPy():
                 path_name = os.getcwd() + '\\data\\train\\imgs\\' + row['image_name']       # windows
                 self.curr_frame.loc[index, 'image_name'] = path_name
             os.chdir(old_path)
+            print(Fore.RED + f'\n=====>DATA:\n')
+            print(Fore.RESET + f'{self.curr_frame}')
         except Exception as e:
             print(f'\n\n{e}\n\n')
-        print(Fore.RED + f'\n=====>DATA:\n')
-        print(Fore.RESET + f'{self.curr_frame}')
         return(self.curr_frame)
     
     def get_cls(self) -> "pd.DataFrame":
@@ -81,10 +79,10 @@ class DataPy():
                     path_name = os.getcwd() + '\\data\\train\\imgs\\' + row['image_name']       # windows
                     row['image_name'][i] = path_name
             os.chdir(old_path)
+            print(Fore.RED + f'\n\n=====>CLASSES:')
+            print(Fore.RESET + f'{self.curr_frame}\n')
         except Exception as e:
             print(f'\n\n{e}\n\n')
-        print(Fore.RED + f'\n\n=====>CLASSES:')
-        print(Fore.RESET + f'{self.curr_frame}\n')
         return(self.curr_frame)
     
     def to_csv(self, out_file_path) -> None:
