@@ -31,86 +31,38 @@ import matplotlib.image as mpimg                            # type: ignore
 # from tensorflow.keras.layers import Dense                   # type: ignore
 # from tensorflow.keras.layers import Flatten                 # type: ignore
 # from tensorflow.keras.optimizers import SGD                 # type: ignore
-from utils.data import DataPy as dpy
+# from utils.data import DataPy as dpy
 
 
-import os
+lstx_train, lstx_test = list(), list()
 for root, dirs, files in os.walk("data/train/imgs_classified_split", topdown=False):
     # build train and val data sets
-    lstx_train, lstx_test = list(), list()
     for name in files:
         cur_path = (os.path.join(root, name)).split('/')[3:]
         if not cur_path[len(cur_path)-1][0] == '.':
             if cur_path[0]=='train':
-                lstx_train.append(mpimg.imread(os.getcwd() + os.path.join(root, name)))
+                lstx_train.append(mpimg.imread(os.getcwd() + '/' + os.path.join(root, name)))
                 # need to add the label as well
             elif cur_path[0]=='val':
-                lstx_test.append(mpimg.imread(os.getcwd() + os.path.join(root, name)))
+                lstx_test.append(mpimg.imread(os.getcwd() + '/' + os.path.join(root, name)))
                 # need to add the label as well
-    X_train = np.array(lstx_train)
-    X_test = np.array(lstx_test)
+X_train = np.array(lstx_train)
+X_test = np.array(lstx_test)
     
-    
-#    for name in files:
-#       print(os.path.join(root, name))
-#    for name in dirs:
-#       print(os.path.join(root, name))    
-
-
-
-@timer
-# load train and test dataset
-def load_dataset() -> Tuple:
-    # reshape dataset to have a single channel
-    trainX = X_train.reshape((X_train.shape[0], 28, 28, 1))
-    # testX = X_train.reshape((X_train.shape[0], 28, 28, 1))
-    
-    # one hot encode target values
-    trainY = to_categorical(y_train)
-    # testY = to_categorical(y_test)
-    return (trainX, trainY, testX, testY)
-
-@timer
-# scale pixels
-def prep_pixels(train, test):
-	# convert from integers to floats
-    train_norm = train.astype('float32')
-    test_norm = test.astype('float32')
-    # normalize to range 0-1
-    train_norm = train_norm / 255.0
-    test_norm = test_norm / 255.0
-    # return normalized images
-    return train_norm, test_norm
-
-#############################################################################
-#############################################################################
-
-# train_img_file = f'{os.getcwd()}/data/emnist-digits-train-images-idx3-ubyte'
-# test_img_file = f'{os.getcwd()}/data/emnist-digits-test-images-idx3-ubyte'
-# train_label_file = f'{os.getcwd()}/data/emnist-digits-train-labels-idx1-ubyte'
-# test_label_file = f'{os.getcwd()}/data/emnist-digits-test-labels-idx1-ubyte'
-
-# X_train = idx2numpy.convert_from_file(train_img_file)
-# y_train = idx2numpy.convert_from_file(train_label_file)
-# X_test = idx2numpy.convert_from_file(test_img_file)
-# y_test = idx2numpy.convert_from_file(test_label_file)
-
-# # # visualize data
-# # for i in range(9): 
-# #     plt.subplot(330 + 1 + i) 
-# #     plt.imshow(X_train[i], cmap=plt.get_cmap('gray'))
-# # plt.show()
+# TODO
+# do the same for labels
+# figure out module error msg for below commented out
 
 # @timer
 # # load train and test dataset
-# def load_dataset() -> Tuple:
+# def load_dataset():
 #     # reshape dataset to have a single channel
 #     trainX = X_train.reshape((X_train.shape[0], 28, 28, 1))
-#     testX = X_train.reshape((X_train.shape[0], 28, 28, 1))
+#     # testX = X_train.reshape((X_train.shape[0], 28, 28, 1))
     
 #     # one hot encode target values
 #     trainY = to_categorical(y_train)
-#     testY = to_categorical(y_test)
+#     # testY = to_categorical(y_test)
 #     return (trainX, trainY, testX, testY)
 
 # @timer
@@ -124,6 +76,18 @@ def prep_pixels(train, test):
 #     test_norm = test_norm / 255.0
 #     # return normalized images
 #     return train_norm, test_norm
+
+
+# # # visualize data
+# # for i in range(9): 
+# #     plt.subplot(330 + 1 + i) 
+# #     plt.imshow(X_train[i], cmap=plt.get_cmap('gray'))
+# # plt.show()
+
+
+
+
+# ............
 
 # @timer
 # # define cnn model
