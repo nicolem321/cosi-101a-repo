@@ -12,7 +12,7 @@
 
 
 import os
-from typing import Tuple
+from typing import Tuple, Iterable
 
 from utils import timer
 
@@ -31,39 +31,30 @@ import matplotlib.image as mpimg                            # type: ignore
 # from tensorflow.keras.layers import Dense                   # type: ignore
 # from tensorflow.keras.layers import Flatten                 # type: ignore
 # from tensorflow.keras.optimizers import SGD                 # type: ignore
-
-
 from utils.data import DataPy as dpy
 
 
-
-# TODO
-# 1. use imgs_classified_split to:
-#       train -> X_train
-#       val -> X_test
-#       all subfolder's names in train -> y_train
-#       all subfolder's names in test -> y_test
-
-
-dir_str = os.getcwd() + '\data\\train\labels.txt'
-dpy.read_data(dpy, dir_str)
-data_df = dpy.get_df(dpy)
-train = list()
-
-for index, row in data_df.iterrows():
-    train.append(mpimg.imread(row['image_name']))
-
-# visualize first 9 images
-for i in range(9): 
-    plt.subplot(330 + 1 + i) 
-    plt.imshow(train[i], cmap=plt.get_cmap('gray'))
-plt.show()
-
-X_train = np.array(train)
-
-# TODO
-# build X_train and X_test
-# ...
+import os
+for root, dirs, files in os.walk("data/train/imgs_classified_split", topdown=False):
+    # build train and val data sets
+    lstx_train, lstx_test = list(), list()
+    for name in files:
+        cur_path = (os.path.join(root, name)).split('/')[3:]
+        if not cur_path[len(cur_path)-1][0] == '.':
+            if cur_path[0]=='train':
+                lstx_train.append(mpimg.imread(os.getcwd() + os.path.join(root, name)))
+                # need to add the label as well
+            elif cur_path[0]=='val':
+                lstx_test.append(mpimg.imread(os.getcwd() + os.path.join(root, name)))
+                # need to add the label as well
+    X_train = np.array(lstx_train)
+    X_test = np.array(lstx_test)
+    
+    
+#    for name in files:
+#       print(os.path.join(root, name))
+#    for name in dirs:
+#       print(os.path.join(root, name))    
 
 
 
