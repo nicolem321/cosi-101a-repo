@@ -136,3 +136,4 @@ PA1venv/
 .DS_Store/
 
 termProject/main.py
+termProject/data/
