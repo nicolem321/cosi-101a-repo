@@ -204,7 +204,7 @@ if __name__ == "__main__":
     y_train = np.array(lsty_train)
     X_test = np.array(lstx_test)
     y_test = np.array(lsty_test)
-    
+    print(X_train)
     
     parser = argparse.ArgumentParser(description="Handwriting Recognition CNN")
     parser.add_argument("--eval", action="store_true")
