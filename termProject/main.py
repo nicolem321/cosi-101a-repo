@@ -22,9 +22,9 @@ from utils.timer import timer
 # import idx2numpy                                            # type: ignore
 import numpy as np                                          # type: ignore
 from numpy import argmax
-from keras.preprocessing.image import load_img
-from keras.preprocessing.image import img_to_array
-from keras.models import load_model
+from keras.preprocessing.image import load_img              # type: ignore
+from keras.preprocessing.image import img_to_array          # type: ignore
+from keras.models import load_model                         # type: ignore
 from numpy import mean                                      # type: ignore
 from numpy import std                                       # type: ignore
 from matplotlib import pyplot as plt                        # type: ignore
@@ -250,6 +250,7 @@ if __name__ == "__main__":
         else:
             print(f'\nFinal Model already found, no need to save!\n\n\nEnter the cmd:   python main.py --run --k N')
     if args.run:
-        
-        app.run(debug=True, port=5000)
+        # TODO
+        # create an instance of run and execute
+        print('ran')
         
