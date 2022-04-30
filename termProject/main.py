@@ -15,12 +15,16 @@ import argparse
 import os
 import subprocess
 from typing import Tuple, Iterable
-import unittest
+import sys
 
 from utils.timer import timer
 
 # import idx2numpy                                            # type: ignore
 import numpy as np                                          # type: ignore
+from numpy import argmax
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+from keras.models import load_model
 from numpy import mean                                      # type: ignore
 from numpy import std                                       # type: ignore
 from matplotlib import pyplot as plt                        # type: ignore
@@ -69,7 +73,7 @@ class Evaluation:
         return train_norm, test_norm
 
     @timer
-    def define_model():
+    def define_model(self):
         ''' define cnn model. '''
         model = Sequential()
         model.add(Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=(28, 28, 1)))
@@ -86,7 +90,7 @@ class Evaluation:
         return model
 
     @timer
-    def evaluate_model(dataX, dataY, n_folds=5):                    #! change n-folds here
+    def evaluate_model(self, dataX, dataY, n_folds=5):                    #! change n-folds here
         ''' evaluate a model using k-fold cross-validation. '''
         scores, histories = list(), list()
         # prepare cross validation
@@ -94,7 +98,7 @@ class Evaluation:
         # enumerate splits
         for train_ix, test_ix in kfold.split(dataX):
             # define model
-            model = define_model()
+            model = self.define_model()
             # select rows for train and test
             trainX, trainY, testX, testY = dataX[train_ix], dataY[train_ix], dataX[test_ix], dataY[test_ix]
             # fit model
@@ -133,8 +137,51 @@ class Evaluation:
         plt.boxplot(scores)
         plt.show()
     
+
+class Run():
+    ''' A class to run a model on a dataset. '''
     
+    #! HOW ARE THEY GIVING US DATA
+    def __init__(self, input_dir: Iterable[str]) -> None:
+        if not os.path.exists('final_model.h5'):
+            print(f'\nYou must first save the model by running the cmd      python main.py --save --k N')
+            sys.exit(0)
+        else:
+            self.input_imgs = input_dir
+            self.target_file = '/results.csv'
+            output = []
+            for img in self.input_imgs:
+                output.append((img, self.run_example(img)))
+ 
+    # load and prepare the image
+    def load_image(self, filename):
+        # load the image
+        img = load_img(filename, grayscale=True, target_size=(28, 28))
+        # convert to array
+        img = img_to_array(img)
+        # reshape into a single sample with 1 channel
+        img = img.reshape(1, 28, 28, 1)
+        # prepare pixel data
+        img = img.astype('float32')
+        img = img / 255.0
+        return img
     
+    # load an image and predict the class
+    def run_example(self, img: str):
+        # load the image
+        img = self.load_image(img)
+        # load model
+        model = load_model('final_model.h5')
+        # predict the class
+        predict_value = model.predict(img)
+        digit = argmax(predict_value)
+        return(digit)
+
+    # write to a csv
+    def write_out(self) -> None:
+        # TODO
+        # write
+        pass
     
 
 if __name__ == "__main__":
@@ -161,8 +208,9 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Handwriting Recognition CNN")
     parser.add_argument("--eval", action="store_true")
-    parser.add_argument("--test", action="store_true")
     parser.add_argument("--run", action="store_true")
+    parser.add_argument("--save", action="store_true")
+    parser.add_argument("--k", action="store_true")
     args = parser.parse_args()
 
     if args.eval:
@@ -170,7 +218,9 @@ if __name__ == "__main__":
                           y_train=y_train, 
                           X_test=X_test, 
                           y_test=y_test, 
-                          k=5)                                                          # The higher the k value, the longer the runtime
+                          k=args.k if args.k else 5)                                                      # The higher the k value, the longer the runtime
+        line = '#'*50
+        print(f'{line}\nRunning an Evaluation of Deep CNN Model\n{line}\nk = {args.k if args.k else 5}\nusing training data\n\n')
         #load data set
         trainX, trainY, testX, testY = eval.load_dataset()
         # prepare pixel data
@@ -181,22 +231,25 @@ if __name__ == "__main__":
         eval.summarize_diagnostics(histories)
         # summarize estimated performance
         eval.summarize_performance(scores)
-        
-        # subprocess.call('./build.sh', shell=False)
-    if args.test:
-        # write test suite and switch below
-        
-        print(f'-'*60,f'\nRunning Test Suite...\n\n', f'-'*60)
-        suite = unittest.TestLoader().loadTestsFromModule(test_hw5)
-        unittest.TextTestRunner(verbosity=3).run(suite)
-        
+    if args.save:
+        # save an eval run as a final model
+        if not os.path.exists('final_model.h5'):
+            eval = Evaluation(X_train=X_train, 
+                          y_train=y_train, 
+                          X_test=X_test, 
+                          y_test=y_test, 
+                          k=args.k if args.k else 5)   
+            line = '#'*50
+            print(f'{line}\nSaving a Copy of Deep CNN Model\n{line}\nk = {args.k if args.k else 5}\nusing training data\n\n')
+            trainX, trainY, testX, testY = eval.load_dataset()
+            trainX, testX = eval.prep_pixels(trainX, testX)
+            model = eval.define_model()
+            model.fit(trainX, trainY, epochs=10, batch_size=32, verbose=0)
+            # save model
+            model.save('final_model.h5')
+        else:
+            print(f'\nFinal Model already found, no need to save!\n\n\nEnter the cmd:   python main.py --run --k N')
     if args.run:
         
         app.run(debug=True, port=5000)
-
-####################################################################################################
-####################################################################################################
-
-# TODO
-# final model to come...
-# create a final model class with the code to come...
+        
