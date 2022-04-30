@@ -1,3 +1,0 @@
-https://blog.keras.io/building-powerful-image-classification-models-using-very-little-data.html
-
-https://www.analyticsvidhya.com/blog/2020/10/create-image-classification-model-python-keras/
