@@ -18,6 +18,8 @@ from typing import Tuple, Iterable
 import sys
 
 from utils.timer import timer
+from utils.animate import Loader
+
 
 # import idx2numpy                                            # type: ignore
 import numpy as np                                          # type: ignore
@@ -190,6 +192,9 @@ class Run():
 
 if __name__ == "__main__":
     
+    #TODO
+    # move below to the eval branch
+    
     # generate data sets
     lstx_train, lsty_train, lstx_test, lsty_test = list(), list(), list(), list()
     for root, dirs, files in os.walk("data/train/imgs_classified_split", topdown=False):
@@ -198,16 +203,6 @@ if __name__ == "__main__":
             cur_path = (os.path.join(root, name)).split('/')[3:]
             if not cur_path[len(cur_path)-1][0] == '.':
                 if cur_path[0]=='train':
-                    # from PIL import Image               # type: ignore
-                    # import PIL                          # type: ignore
-                    # import glob
-                                        
-                    
-                    # image = Image.open(os.getcwd() + '/' + os.path.join(root, name))
-                    # print(image.size)
-
-                    
-                    
                     lstx_train.append(mpimg.imread(os.getcwd() + '/' + os.path.join(root, name)))
                     lsty_train.append(cur_path[1])
                     # need to add the label as well
@@ -229,7 +224,7 @@ if __name__ == "__main__":
     parser.add_argument("--eval", action="store_true")
     parser.add_argument("--run", action="store_true")
     parser.add_argument("--save", action="store_true")
-    parser.add_argument("--k")
+    parser.add_argument("--k", metavar='N', type=int, nargs='+')
     args = parser.parse_args()
 
     if args.eval:
@@ -262,14 +257,17 @@ if __name__ == "__main__":
             print(f'{line}\nSaving a Copy of Deep CNN Model\n{line}\nk = {args.k if args.k else 5}\nusing training data\n\n')
             trainX, trainY, testX, testY = eval.load_dataset()
             trainX, testX = eval.prep_pixels(trainX, testX)
-            model = eval.define_model()            
+            model = eval.define_model()  
+            loader = Loader("Running Model To Save...", "All done!", 0.05).start()          
             model.fit(trainX, trainY, epochs=10, batch_size=32, verbose=0)
             # save model
             model.save('final_model.h5')
+            loader.stop()
         else:
             print(f'\nFinal Model already found, no need to save!\n\n\nEnter the cmd:   python main.py --run --k N')
     if args.run:
         # TODO
         # create an instance of run and execute
+        # write script to iterate through a directory of just imgs - no splitting
         print('ran')
         

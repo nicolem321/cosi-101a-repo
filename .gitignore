@@ -137,3 +137,4 @@ PA1venv/
 
 termProject/.DS_Store
 termProject/data/.DS_Store
+termProject/final_model.h5
