@@ -135,8 +135,5 @@ classPractice/
 PA1venv/
 .DS_Store/
 
-termProject/main.py
-termProject/data/
-.DS_Store
 termProject/.DS_Store
 termProject/data/.DS_Store
