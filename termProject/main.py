@@ -144,7 +144,7 @@ class Evaluation:
         plt.show()
     
 
-class Run():
+class Run:
     ''' A class to run a model on a dataset. '''
     
     #! HOW ARE THEY GIVING US DATA
@@ -190,8 +190,106 @@ class Run():
         pass
     
 
+class Run2:
+    def run(self):
+        
+        # /Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/data/train/imgs_classified_split/train
+        # /Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/data/train/imgs_classified_split/val
+        train_data_dir="/Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/v_data/imgs_classified_split/train"
+        validation_data_dir="/Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/v_data/imgs_classified_split/val"
+        # Importing all necessary libraries
+        from keras.preprocessing.image import ImageDataGenerator
+        from keras.models import Sequential
+        from keras.layers import Conv2D, MaxPooling2D
+        from keras.layers import Activation, Dropout, Flatten, Dense
+        from keras import backend as K
+        import cv2
+        
+        img_width, img_height = 456, 160
+
+        nb_train_samples =680
+        nb_validation_samples = 180
+        epochs = 10
+        batch_size = 16
+        
+        if K.image_data_format() == 'channels_first':
+            input_shape = (3, img_width, img_height)
+        else:
+            input_shape = (img_width, img_height, 3)
+            
+          
+        model = Sequential()
+        model.add(Conv2D(32, (2, 2), input_shape=input_shape))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        
+        model.add(Conv2D(32, (2, 2)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        
+        model.add(Conv2D(64, (2, 2)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        
+        model.add(Flatten())
+        model.add(Dense(64))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(1))
+        model.add(Activation('sigmoid'))
+        
+                
+        model.compile(loss='binary_crossentropy',
+                    optimizer='rmsprop',
+                    metrics=['accuracy'])
+        
+        
+        train_datagen = ImageDataGenerator(
+            rescale=1. / 255,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True)
+        
+        test_datagen = ImageDataGenerator(rescale=1. / 255)
+        
+        train_generator = train_datagen.flow_from_directory(
+            train_data_dir,
+            target_size=(img_width, img_height),
+            batch_size=batch_size,
+            class_mode='binary')
+        
+        validation_generator = test_datagen.flow_from_directory(
+            validation_data_dir,
+            target_size=(img_width, img_height),
+            batch_size=batch_size,
+            class_mode='binary')
+        
+        model.fit(
+            train_generator,
+            steps_per_epoch=nb_train_samples // batch_size,
+            epochs=epochs,
+            validation_data=validation_generator,
+            validation_steps=nb_validation_samples // batch_size)
+        
+        model.save_weights('model_saved.h5')
+
+        
+        # train_y=training_set.classes
+        # test_y=test_set.classes
+        
+        # vgg = VGG19(input_shape=IMAGE_SIZE + [3], weights='imagenet', include_top=False)
+
+        # print(training_set.class_indices,train_y.shape,test_y.shape)
+        
+        
+        
+        
+
 if __name__ == "__main__":
-    
+    from keras import backend as K                                      # type: ignore
+    img_width, img_height = 456, 160
+
+
     #TODO
     # move below to the eval branch
     
@@ -267,7 +365,7 @@ if __name__ == "__main__":
             print(f'\nFinal Model already found, no need to save!\n\n\nEnter the cmd:   python main.py --run --k N')
     if args.run:
         # TODO
-        # create an instance of run and execute
-        # write script to iterate through a directory of just imgs - no splitting
-        print('ran')
-        
+        # resize by scale all images and write to output
+        # test on just two classes
+        run = Run2()
+        run.run()        
