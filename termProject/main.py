@@ -195,8 +195,8 @@ class Run2:
         
         # /Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/data/train/imgs_classified_split/train
         # /Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/data/train/imgs_classified_split/val
-        train_data_dir="/Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/v_data/imgs_classified_split/train"
-        validation_data_dir="/Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/v_data/imgs_classified_split/val"
+        train_data_dir="/Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/data_2/imgs_classified_split/train"
+        validation_data_dir="/Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/data_2/imgs_classified_split/val"
         # Importing all necessary libraries
         from keras.preprocessing.image import ImageDataGenerator
         from keras.models import Sequential
@@ -205,7 +205,7 @@ class Run2:
         from keras import backend as K
         import cv2
         
-        img_width, img_height = 456, 160
+        img_width, img_height = 228, 228
 
         nb_train_samples =680
         nb_validation_samples = 180
@@ -273,22 +273,21 @@ class Run2:
         
         model.save_weights('model_saved.h5')
 
-        
-        # train_y=training_set.classes
-        # test_y=test_set.classes
-        
-        # vgg = VGG19(input_shape=IMAGE_SIZE + [3], weights='imagenet', include_top=False)
 
-        # print(training_set.class_indices,train_y.shape,test_y.shape)
+# class Run3:
+    
         
         
         
-        
+def make_square(im, min_size=228, fill_color=(0, 0, 0, 0)):
+                            x, y = im.size
+                            size = max(min_size, x, y)
+                            new_im = Image.new('RGBA', (size, size), fill_color)
+                            new_im.paste(im, (int((size - x) / 2), int((size - y) / 2)))
+                            return new_im       
 
 if __name__ == "__main__":
     from keras import backend as K                                      # type: ignore
-    img_width, img_height = 456, 160
-
 
     #TODO
     # move below to the eval branch
@@ -303,11 +302,9 @@ if __name__ == "__main__":
                 if cur_path[0]=='train':
                     lstx_train.append(mpimg.imread(os.getcwd() + '/' + os.path.join(root, name)))
                     lsty_train.append(cur_path[1])
-                    # need to add the label as well
                 elif cur_path[0]=='val':
                     lstx_test.append(mpimg.imread(os.getcwd() + '/' + os.path.join(root, name)))
                     lsty_test.append(cur_path[1])
-                    # need to add the label as well
     X_train = np.array(lstx_train)
     y_train = np.array(lsty_train)
     X_test = np.array(lstx_test)
@@ -323,6 +320,7 @@ if __name__ == "__main__":
     parser.add_argument("--run", action="store_true")
     parser.add_argument("--save", action="store_true")
     parser.add_argument("--k", metavar='N', type=int, nargs='+')
+    parser.add_argument("--resize", action="store_true")
     args = parser.parse_args()
 
     if args.eval:
@@ -367,5 +365,36 @@ if __name__ == "__main__":
         # TODO
         # resize by scale all images and write to output
         # test on just two classes
+        if args.resize:
+            from PIL import Image
+            import PIL
+            for root, dirs, files in os.walk("data_2/imgs_classified_split/train", topdown=False):
+                # build train and val data sets
+                for name in files:
+                    cur_path = (os.path.join(root, name)).split('/')[3:]
+                    if not cur_path[len(cur_path)-1][0] == '.':
+                        
+                        # pad and scale
+                        # test_image = Image.open(os.getcwd() + '/' + os.path.join(root, name))
+                        # new_image = make_square(test_image)
+                        # fixed_height = 228
+                        # height_percent = (fixed_height / float(new_image.size[1]))
+                        # width_size = int((float(new_image.size[0]) * float(height_percent)))
+                        # new_image = new_image.resize((width_size, fixed_height), PIL.Image.NEAREST)
+                       
+                        # scale
+                        # new_image = Image.open(os.getcwd() + '/' + os.path.join(root, name))
+                        # fixed_height = 80
+                        # height_percent = (fixed_height / float(new_image.size[1]))
+                        # width_size = int((float(new_image.size[0]) * float(height_percent)))
+                        # new_image = new_image.resize((width_size, fixed_height), PIL.Image.NEAREST)
+                       
+                        # resize
+                        new_image = Image.open(os.getcwd() + '/' + os.path.join(root, name))
+                        new_image = new_image.resize((228,228))
+                        
+                        # print(new_image.size)
+                        new_image.save(os.getcwd() + '/' + os.path.join(root, name))
+                    
         run = Run2()
         run.run()        
