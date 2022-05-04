@@ -205,11 +205,11 @@ class Run2:
         from keras import backend as K
         import cv2
         
-        img_width, img_height = 228, 228
+        img_width, img_height = 40, 114
 
         nb_train_samples =680
         nb_validation_samples = 180
-        epochs = 10
+        epochs = 100
         batch_size = 16
         
         if K.image_data_format() == 'channels_first':
@@ -280,11 +280,11 @@ class Run2:
         
         
 def make_square(im, min_size=228, fill_color=(0, 0, 0, 0)):
-                            x, y = im.size
-                            size = max(min_size, x, y)
-                            new_im = Image.new('RGBA', (size, size), fill_color)
-                            new_im.paste(im, (int((size - x) / 2), int((size - y) / 2)))
-                            return new_im       
+    x, y = im.size
+    size = max(min_size, x, y)
+    new_im = Image.new('RGBA', (size, size), fill_color)
+    new_im.paste(im, (int((size - x) / 2), int((size - y) / 2)))
+    return new_im       
 
 if __name__ == "__main__":
     from keras import backend as K                                      # type: ignore
@@ -383,15 +383,15 @@ if __name__ == "__main__":
                         # new_image = new_image.resize((width_size, fixed_height), PIL.Image.NEAREST)
                        
                         # scale
-                        # new_image = Image.open(os.getcwd() + '/' + os.path.join(root, name))
-                        # fixed_height = 80
-                        # height_percent = (fixed_height / float(new_image.size[1]))
-                        # width_size = int((float(new_image.size[0]) * float(height_percent)))
-                        # new_image = new_image.resize((width_size, fixed_height), PIL.Image.NEAREST)
-                       
-                        # resize
                         new_image = Image.open(os.getcwd() + '/' + os.path.join(root, name))
-                        new_image = new_image.resize((228,228))
+                        fixed_height = 40
+                        height_percent = (fixed_height / float(new_image.size[1]))
+                        width_size = int((float(new_image.size[0]) * float(height_percent)))
+                        new_image = new_image.resize((width_size, fixed_height), PIL.Image.NEAREST)
+                       
+                        # # resize
+                        # new_image = Image.open(os.getcwd() + '/' + os.path.join(root, name))
+                        # new_image = new_image.resize((228,228))
                         
                         # print(new_image.size)
                         new_image.save(os.getcwd() + '/' + os.path.join(root, name))
