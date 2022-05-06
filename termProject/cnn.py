@@ -3,16 +3,17 @@ import csv
 import os
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-from utils.animate import Loader
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torch
-from tqdm import tqdm
-from PIL import Image
+import matplotlib.pyplot as plt                                     # type: ignore
+from utils.animate import Loader                                    # type: ignore
+from torchvision import datasets, transforms                        # type: ignore
+from torch.utils.data import DataLoader                             # type: ignore
+import torch.nn as nn                                               # type: ignore
+import torch.nn.functional as F                                     # type: ignore
+import torch.optim as optim                                         # type: ignore
+import torch                                                        # type: ignore
+from tqdm import tqdm                                               # type: ignore
+from PIL import Image                                               # type: ignore
+
 
 class Client:
     def __init__(self, dir: str) -> None:
