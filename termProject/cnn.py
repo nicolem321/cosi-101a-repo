@@ -1,5 +1,7 @@
 import argparse
 import os
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
@@ -8,6 +10,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch
 from tqdm import tqdm
+from PIL import Image
 
 class Client:
     def __init__(self, dir: str) -> None:
@@ -20,12 +23,12 @@ class Client:
     
     # load the data from the folders
     def get_data(self):
-        data_dir = '/Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/imgs_classified_split' #change here the path 
+        # data_dir = '/Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/imgs_classified_split' #change here the path 
         transform = transforms.Compose([transforms.Grayscale(num_output_channels=1),transforms.Resize((40,114)),transforms.ToTensor(),transforms.Normalize((0.5,), (0.5,)),])
 
         # ImageFolder automatically assign labels to imgs using the name of their folder
-        train_set = datasets.ImageFolder(data_dir + '/train',transform=transform)
-        val_set = datasets.ImageFolder(data_dir + '/val',transform=transform)
+        train_set = datasets.ImageFolder(self.dir + '/train',transform=transform)
+        val_set = datasets.ImageFolder(self.dir + '/val',transform=transform)
         
         img, label = train_set[0]
         print("my input data size: ", img.shape)
@@ -119,7 +122,10 @@ class CNN(nn.Module):
     def forward(self, x):
         x = F.relu(F.max_pool2d(self.conv1(x), 2))
         x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
-        x = x.view(-1, 20*7*25)
+        x = x.view(-1, 20*7*25) # 220*37*111
+        # m = nn.AdaptiveMaxPool2d((3500,50))
+        # x = m(x)
+        # x = x.view(-1, x.size(0))
         x = F.relu(self.fc1(x))
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
@@ -145,10 +151,10 @@ if __name__ == '__main__':
     parser.add_argument("--run", "-r", action="store_true")
     parser.add_argument("--save", "-s", action="store_true")
     parser.add_argument("--eval", "-t", action="store_true")
-    parser.add_argument("--epochs", metavar='N', type=int, nargs='+')
-    parser.add_argument("--learn_rate", metavar='N', type=int, nargs='+')
-    parser.add_argument("--dir", "-d", metavar='N', type=int, nargs='+')
-    parser.add_argument("--verbosity", metavar='N', type=int, nargs='+')
+    parser.add_argument("--epochs", metavar='N', type=int)
+    parser.add_argument("--learn_rate", metavar='N', type=int)
+    parser.add_argument("--dir", "-d", metavar='N', type=str)
+    parser.add_argument("--verbosity", metavar='N', type=int)
     args = parser.parse_args()
     
     if args.eval:
@@ -165,24 +171,48 @@ if __name__ == '__main__':
         # save an eval run as a final model
         if not os.path.exists('final_model.h5'):
             line = '#'*50
-            print(f'{line}\nSaving a Copy of CNN Model\n{line}\nepochs = {args.epochs[0] if args.epochs else 80}\n\n')
+            print(f'{line}\nSaving a Copy of CNN Model\n{line}\nepochs = {args.epochs if args.epochs else 80}\n\n')
             client = Client(dir=args.dir[0] if  args.dir else './imgs_classified_split')
             train_loader, val_loader = client.get_data()
             device0 = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
             network = CNN().to(device0)
             client.train(model=network, train_loader=train_loader, 
                         test_loader=val_loader, device=device0,
-                        num_epoch=args.epochs[0] if args.epochs else 80,
+                        num_epoch=args.epochs if args.epochs else 80,
                         learning_rate=args.learn_rate[0] if args.learn_rate else 0.0013,
                         verbosity=args.verbosity[0] if args.verbosity else 1)
-            torch.save(network.state_dict(), './final_model.h5')    # ?
+            torch.save(network.state_dict(), './final_model.h5')
         else:
-            print(f'\nFinal Model already found, no need to save!\n\n\nEnter the cmd:   python main.py --run --k N')
+            print(f'\nFinal Model already found, no need to save!\n\n\nEnter the cmd:   python main.py -r')
     if args.run:
-        pass
-        # model = TheModelClass(*args, **kwargs)
-        # model.load_state_dict(torch.load(PATH))
-        # model.eval()
+        network = CNN()
+        network.load_state_dict(torch.load('./final_model.h5'))
+        # Create the preprocessing transformation here
+        # transform = transforms.ToTensor()
+        transform = transforms.Compose([transforms.Grayscale(num_output_channels=1),transforms.Resize((40,114)),transforms.ToTensor(),transforms.Normalize((0.5,), (0.5,)),])
+
+
+        # load your image(s)
+        img = Image.open('/Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/imgs/0004.png')
+
+        # Transform
+        input = transform(img)
+
+        # unsqueeze batch dimension, in case you are dealing with a single image
+        input = input.unsqueeze(0)
+        
+        # Set model to eval
+        network.eval()
+
+        # Get prediction
+        output = network(input)
+        pred = torch.max(output.data, 1)
+        print(pred)
+
+        
+        
+        
+        
     
 # # @timer
 # def summarize_diagnostics(histories):
