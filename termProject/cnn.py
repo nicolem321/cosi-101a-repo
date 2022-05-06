@@ -1,8 +1,10 @@
 import argparse
+import csv
 import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from utils.animate import Loader
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 import torch.nn as nn
@@ -23,7 +25,6 @@ class Client:
     
     # load the data from the folders
     def get_data(self):
-        # data_dir = '/Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/imgs_classified_split' #change here the path 
         transform = transforms.Compose([transforms.Grayscale(num_output_channels=1),transforms.Resize((40,114)),transforms.ToTensor(),transforms.Normalize((0.5,), (0.5,)),])
 
         # ImageFolder automatically assign labels to imgs using the name of their folder
@@ -123,28 +124,11 @@ class CNN(nn.Module):
         x = F.relu(F.max_pool2d(self.conv1(x), 2))
         x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
         x = x.view(-1, 20*7*25) # 220*37*111
-        # m = nn.AdaptiveMaxPool2d((3500,50))
-        # x = m(x)
-        # x = x.view(-1, x.size(0))
         x = F.relu(self.fc1(x))
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
         return F.log_softmax(x, -1)
 
-    
-    
-    
-# Hyper parameters
-# batch_size_train = 64
-# batch_size_val = 1000
-# n_epochs = 80
-# learning_rate = 0.0013
-# momentum = 0.5
-def visualize(client, train_loader) -> None:
-    client.train_imshow(train_loader)
-    for i, (images, labels) in enumerate(train_loader):
-        print(images.shape)
-        break
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Handwriting Recognition CNN")
@@ -172,6 +156,7 @@ if __name__ == '__main__':
         if not os.path.exists('final_model.h5'):
             line = '#'*50
             print(f'{line}\nSaving a Copy of CNN Model\n{line}\nepochs = {args.epochs if args.epochs else 80}\n\n')
+            loader = Loader("Running Model To Save...", "All done!", 0.05).start()          
             client = Client(dir=args.dir[0] if  args.dir else './imgs_classified_split')
             train_loader, val_loader = client.get_data()
             device0 = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -182,36 +167,50 @@ if __name__ == '__main__':
                         learning_rate=args.learn_rate[0] if args.learn_rate else 0.0013,
                         verbosity=args.verbosity[0] if args.verbosity else 1)
             torch.save(network.state_dict(), './final_model.h5')
+            loader.stop()
         else:
             print(f'\nFinal Model already found, no need to save!\n\n\nEnter the cmd:   python main.py -r')
     if args.run:
         network = CNN()
         network.load_state_dict(torch.load('./final_model.h5'))
         # Create the preprocessing transformation here
-        # transform = transforms.ToTensor()
         transform = transforms.Compose([transforms.Grayscale(num_output_channels=1),transforms.Resize((40,114)),transforms.ToTensor(),transforms.Normalize((0.5,), (0.5,)),])
+        if args.dir:
+            line = '#'*50
+            print(f'{line}\nLoading Model...\n{line}\nUsing dir provided:  {args.dir}\n\n')
+            final_results = []
+            loader = Loader("Predicting and Writing...", "All done!", 0.05).start()          
 
+            for root, dirs, files in os.walk(args.dir, topdown=False):
+                # build train and val data sets
+                for name in files:
+                    cur_path = (os.path.join(root, name))
+                    if not cur_path[len(cur_path)-1][0] == '.':
+                        # load your image(s)
+                        img = Image.open(os.getcwd() + '/' + os.path.join(root, name))
+                        # Transform
+                        input = transform(img)
+                        # unsqueeze batch dimension, in case you are dealing with a single image
+                        input = input.unsqueeze(0)
+                        # Set model to eval
+                        network.eval()
+                        # Get prediction
+                        output = network(input)
+                        pred = torch.max(output.data, 1).indices
+                        final_results.append({'img':name, 'label':pred[0].item()})
+            keys = final_results[0].keys()
+            with open('./results.csv', 'w', newline=None) as output_file:
+                dict_writer = csv.DictWriter(output_file, keys)
+                dict_writer.writeheader()
+                dict_writer.writerows(final_results)
+            loader.stop()
+        else:
+            line = '#'*50
+            print(f'{line}\nNO GIVEN DIRECTORY\n{line}\nPlease provide a directory of images, like so:\n\npython3.* main.py --run/-r --dir/-d dir_name\n\n')
 
-        # load your image(s)
-        img = Image.open('/Users/masonware/Desktop/brandeis_cosi/COSI_101A/termProject/imgs/0004.png')
-
-        # Transform
-        input = transform(img)
-
-        # unsqueeze batch dimension, in case you are dealing with a single image
-        input = input.unsqueeze(0)
         
-        # Set model to eval
-        network.eval()
-
-        # Get prediction
-        output = network(input)
-        pred = torch.max(output.data, 1)
-        print(pred)
-
         
-        
-        
+# matplot lib below
         
     
 # # @timer
@@ -238,3 +237,9 @@ if __name__ == '__main__':
 #     # box and whisker plots of results
 #     plt.boxplot(scores)
 #     plt.show()
+
+# def visualize(client, train_loader) -> None:
+#     client.train_imshow(train_loader)
+#     for i, (images, labels) in enumerate(train_loader):
+#         print(images.shape)
+#         break
