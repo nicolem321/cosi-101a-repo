@@ -6,6 +6,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt                                     # type: ignore
 from utils.animate import Loader                                    # type: ignore
 from torchvision import datasets, transforms                        # type: ignore
+import torchvision.models as models                                 # typeL ignore
 from torch.utils.data import DataLoader                             # type: ignore
 import torch.nn as nn                                               # type: ignore
 import torch.nn.functional as F                                     # type: ignore
@@ -20,20 +21,29 @@ class Client:
         self.dir = dir
         self.batch_size_train = 64
         self.batch_size_val = 1000
-        self.n_epochs = 80
-        self.learning_rate = 0.0013
+        self.n_epochs = 7
+        self.learning_rate = 0.0014
         self.momentum = 0.5
     
     # load the data from the folders
     def get_data(self):
-        transform = transforms.Compose([transforms.Grayscale(num_output_channels=1),transforms.Resize((40,114)),transforms.ToTensor(),transforms.Normalize((0.5,), (0.5,)),])
+        transform1 = transforms.Compose([transforms.Resize((224,224)),transforms.ToTensor(),transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])])
+        transform2 = transforms.Compose([transforms.Resize((224,224)),transforms.GaussianBlur(kernel_size=(5, 9)),transforms.RandomRotation(degrees=(0, 30)),transforms.ToTensor(),transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])])
 
         # ImageFolder automatically assign labels to imgs using the name of their folder
-        train_set = datasets.ImageFolder(self.dir + '/train',transform=transform)
+        train_set = []
+        for i in range(1,3):
+            if i == 1:
+                transform = transform1
+            else: 
+                transform = transform2
+            for data in datasets.ImageFolder(self.dir + '/train',transform=transform):
+                train_set.append(data)
+        
         val_set = datasets.ImageFolder(self.dir + '/val',transform=transform)
         
         img, label = train_set[0]
-        print("my input data size: ", img.shape)
+        print("my input data size: ", img.shape, len(train_set))
 
         train_loader = DataLoader(train_set, batch_size=self.batch_size_train, shuffle=True)
         val_loader = DataLoader(val_set, batch_size=self.batch_size_val, shuffle=True)
@@ -118,13 +128,13 @@ class CNN(nn.Module):
         self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
         self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
         self.conv2_drop = nn.Dropout2d(0.2)
-        self.fc1 = nn.Linear(3500, 50)
+        self.fc1 = nn.Linear(5780, 50)
         self.fc2 = nn.Linear(50, 10)
 
     def forward(self, x):
         x = F.relu(F.max_pool2d(self.conv1(x), 2))
         x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
-        x = x.view(-1, 20*7*25) # 220*37*111
+        x = x.view(-1, 5780)
         x = F.relu(self.fc1(x))
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
@@ -143,28 +153,30 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     if args.eval:
-        client = Client(dir=args.dir[0] if  args.dir else './imgs_classified_split')
+        client = Client(dir=args.dir[0] if  args.dir else './data/imgs_classified_split')
         train_loader, val_loader = client.get_data()
         device0 = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        network = CNN().to(device0)
+        # network = CNN().to(device0)
+        network = models.resnet18(pretrained=True)
         client.train(model=network, train_loader=train_loader, 
                     test_loader=val_loader, device=device0,
-                    num_epoch=args.epochs[0] if args.epochs else 80,
-                    learning_rate=args.learn_rate[0] if args.learn_rate else 0.0013,
+                    num_epoch=args.epochs[0] if args.epochs else 7,
+                    learning_rate=args.learn_rate[0] if args.learn_rate else 0.0014,
                     verbosity=args.verbosity[0] if args.verbosity else 1)
     if args.save:
         # save an eval run as a final model
         if not os.path.exists('final_model.h5'):
             line = '#'*50
-            print(f'{line}\nSaving a Copy of CNN Model\n{line}\nepochs = {args.epochs if args.epochs else 80}\n\n')
+            print(f'{line}\nSaving a Copy of CNN Model\n{line}\nepochs = {args.epochs if args.epochs else 7}\n\n')
             loader = Loader("Running Model To Save...", "All done!", 0.05).start()          
-            client = Client(dir=args.dir[0] if  args.dir else './imgs_classified_split')
+            client = Client(dir=args.dir[0] if  args.dir else './data/imgs_classified_split')
             train_loader, val_loader = client.get_data()
             device0 = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-            network = CNN().to(device0)
+            # network = Net().to(device0)
+            network = models.resnet18(pretrained=True)
             client.train(model=network, train_loader=train_loader, 
                         test_loader=val_loader, device=device0,
-                        num_epoch=args.epochs if args.epochs else 80,
+                        num_epoch=args.epochs if args.epochs else 7,
                         learning_rate=args.learn_rate[0] if args.learn_rate else 0.0013,
                         verbosity=args.verbosity[0] if args.verbosity else 1)
             torch.save(network.state_dict(), './final_model.h5')
