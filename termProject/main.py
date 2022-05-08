@@ -184,10 +184,10 @@ if __name__ == '__main__':
         else:
             print(f'\nFinal Model already found, no need to save!\n\n\nEnter the cmd:   python main.py -r')
     if args.run:
-        network = CNN()
+        network = models.resnet18(pretrained=True)
         network.load_state_dict(torch.load('./final_model.h5'))
         # Create the preprocessing transformation here
-        transform = transforms.Compose([transforms.Grayscale(num_output_channels=1),transforms.Resize((40,114)),transforms.ToTensor(),transforms.Normalize((0.5,), (0.5,)),])
+        transform = transforms.Compose([transforms.Resize((224,224)),transforms.ToTensor(),transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])])
         if args.dir:
             line = '#'*50
             print(f'{line}\nLoading Model...\n{line}\nUsing dir provided:  {args.dir}\n\n')
@@ -200,7 +200,7 @@ if __name__ == '__main__':
                     cur_path = (os.path.join(root, name))
                     if not cur_path[len(cur_path)-1][0] == '.':
                         # load your image(s)
-                        img = Image.open(os.getcwd() + '/' + os.path.join(root, name))
+                        img = Image.open(os.getcwd() + '/' + os.path.join(root, name)).convert('RGB')
                         # Transform
                         input = transform(img)
                         # unsqueeze batch dimension, in case you are dealing with a single image
