@@ -1,45 +1,43 @@
 #!usr/bin/python3
 
-# main.py
+# mason_cnn.py
 # Version 2.0.0
-# 4-19-22
+# 05-08-22
 
 # Written By: Mason Ware 
 
 
-''' This file follows the structure of my main.py file in my HW6 submission, with
-	additions. '''
+''' This is the file for the original CNN that I tested. However, this model had issues with
+    image processing and its accuracy was very low. I am sure that with time I could fix the
+    issues but it became easier and more sensible to invest our group efforts in Novia's working
+    network. The last time this file was edited in a meaningul way was on April 30th. '''
 
 
-import argparse
+from typing import Iterable
 import os
-import subprocess
-from typing import Tuple, Iterable
 import sys
+import argparse
 
 from utils.timer import timer
 from utils.animate import Loader
 
-
-# import idx2numpy                                            # type: ignore
-import numpy as np                                          # type: ignore
-from numpy import argmax
-from keras.preprocessing.image import load_img              # type: ignore
-from keras.preprocessing.image import img_to_array          # type: ignore
-from keras.models import load_model                         # type: ignore
-from numpy import mean                                      # type: ignore
 from numpy import std                                       # type: ignore
+from numpy import mean                                      # type: ignore
+from numpy import argmax                                    # type: ignore
+from keras.models import load_model                         # type: ignore
 from matplotlib import pyplot as plt                        # type: ignore
-import matplotlib.image as mpimg                            # type: ignore
 from sklearn.model_selection import KFold                   # type: ignore
-from tensorflow.keras.utils import to_categorical           # type: ignore
-from tensorflow.keras.models import Sequential              # type: ignore
-from tensorflow.keras.layers import Conv2D                  # type: ignore
-from tensorflow.keras.layers import MaxPooling2D            # type: ignore
 from tensorflow.keras.layers import Dense                   # type: ignore
+from tensorflow.keras.layers import Conv2D                  # type: ignore
 from tensorflow.keras.layers import Flatten                 # type: ignore
 from tensorflow.keras.optimizers import SGD                 # type: ignore
-# from utils.data import DataPy as dpy
+from tensorflow.keras.models import Sequential              # type: ignore
+from keras.preprocessing.image import load_img              # type: ignore
+from tensorflow.keras.layers import MaxPooling2D            # type: ignore
+from tensorflow.keras.utils import to_categorical           # type: ignore
+from keras.preprocessing.image import img_to_array          # type: ignore
+import numpy as np                                          # type: ignore
+import matplotlib.image as mpimg                            # type: ignore
 
 
 class Evaluation:
@@ -146,9 +144,7 @@ class Evaluation:
 
 class Run:
     ''' A class to run a model on a dataset. '''
-    
-    #! HOW ARE THEY GIVING US DATA
-    def __init__(self, input_dir: Iterable[str]) -> None:
+        def __init__(self, input_dir: Iterable[str]) -> None:
         if not os.path.exists('final_model.h5'):
             print(f'\nYou must first save the model by running the cmd      python main.py --save --k N')
             sys.exit(0)
